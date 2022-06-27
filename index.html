@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script
+      type="module"
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"
+    ></script>
+    <style>
+      model-viewer {
+        width: 100%;
+        height: 80vh;
+      }
+      .controls {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-evenly;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+    <title>Model Viewer Example</title>
+  </head>
+  <body>
+    <model-viewer
+      id="ModelViewer"
+      camera-controls
+      src="./assets/model1.glb"
+      alt="A 3D model of a mug"
+      camera-orbit="190deg 76deg 15cm"
+      auto-rotate
+      interaction-prompt="auto"
+      interaction-prompt-threshold="1000"
+      align-model="origin"
+      background-color="#F2F2F6"
+    >
+      <div class="controls">
+        <div>
+          <p>Texture</p>
+          <select id="imageSelector">
+            <option value="./assets/model1_img0.jpg">Image 1</option>
+            <option value="./assets/model2_img0.jpg">Image 2</option>
+            <option value="./assets/model3_img0.jpg">Image 3</option>
+            <option value="./assets/model4_img0.jpg">Image 4</option>
+          </select>
+        </div>
+        <div>
+          <p>Color</p>
+          <input
+            type="color"
+            id="colorPicker"
+            name="favcolor"
+            value="#ffffff"
+          />
+        </div>
+      </div>
+    </model-viewer>
+    <script type="module">
+      const hexToRgbA = (hex) => {
+        var c;
+        if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+          c = hex.substring(1).split("");
+          if (c.length == 3) {
+            c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+          }
+          c = "0x" + c.join("");
+          return [
+            ((c >> 16) & 255) / 255,
+            ((c >> 8) & 255) / 255,
+            (c & 255) / 255,
+            1
+          ];
+        }
+        throw new Error("Bad Hex");
+      };
+
+      document
+        .querySelector("#imageSelector")
+        .addEventListener("input", (event) => {
+          const modelViewerTexture = document.querySelector(
+            "model-viewer#ModelViewer"
+          );
+          let material = modelViewerTexture.model.materials[2];
+
+          let applyPBRTexture = (channel, event) => {
+            material.pbrMetallicRoughness[channel].texture.source.setURI(
+              event.target.value
+            );
+          };
+          applyPBRTexture("baseColorTexture", event);
+        });
+
+      document
+        .querySelector("#colorPicker")
+        .addEventListener("input", (event) => {
+          const modelViewerTexture = document.querySelector(
+            "model-viewer#ModelViewer"
+          );
+          let material = modelViewerTexture.model.materials[1];
+
+          let applyPBRTexture = (channel, event) => {
+            material.pbrMetallicRoughness.setBaseColorFactor(
+              hexToRgbA(event.target.value)
+            );
+          };
+          applyPBRTexture("baseColorFactor", event);
+        });
+    </script>
+  </body>
+</html>
